@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+    
+    <dbname value = "the-assistant"/>
+    
+    <version value = "1"/>
+    
+    <list>
+        <mapping class = "com.qiyue.jia.the_assistant.db.Province"></mapping>
+        <mapping class="com.qiyue.jia.the_assistant.db.City"></mapping>
+        <mapping class="com.qiyue.jia.the_assistant.db.County"></mapping>
+    </list>
+    
+</litepal>

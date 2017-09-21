@@ -27,4 +27,13 @@ dependencies {
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
+    //LitePal数据库操作
+    compile 'org.litepal.android:core:1.4.1'
+    //OkHttp网络请求
+    compile 'com.squareup.okhttp3:okhttp:3.4.1'
+    //GSON解析json
+    compile 'com.google.code.gson:gson:2.7'
+    //Glide加载和展示数据
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+
 }
