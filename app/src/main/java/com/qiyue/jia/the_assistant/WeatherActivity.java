@@ -1,5 +1,6 @@
 package com.qiyue.jia.the_assistant;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.qiyue.jia.the_assistant.gson.DailyForecast;
 import com.qiyue.jia.the_assistant.gson.Weather;
+import com.qiyue.jia.the_assistant.service.AutoUpdateService;
 import com.qiyue.jia.the_assistant.util.HttpUtil;
 import com.qiyue.jia.the_assistant.util.Utility;
 
@@ -73,7 +75,7 @@ public class WeatherActivity extends AppCompatActivity{
 
         swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
         SharedPreferences prefes = PreferenceManager.getDefaultSharedPreferences(this);
-        String weatherString = prefes.getString("weather_id", null);
+        String weatherString = prefes.getString("weather", null);
         if (weatherString != null) {
             //有缓存是直接解析天气数据
             Weather weather = Utility.handleWeatherResponse(weatherString);
@@ -193,43 +195,53 @@ public class WeatherActivity extends AppCompatActivity{
      */
     private void showWeatherInfo(Weather weather) {
 
-        String cityName = weather.basic.cityName;
-        String updateTime = weather.basic.update.updateTime.split(" ")[1];
-        String degree = weather.now.tmp + "℃";
-        String weatherInfo = weather.now.cond.weatherInfo;
+        if (weather != null && "ok".equals(weather.status)) {
 
-        titleCity.setText(cityName);
-        titleUpdateTime.setText("最近更新时间:"+updateTime);
-        degreeText.setText(degree);
-        weatherInfoText.setText(weatherInfo);
-        forecastLayout.removeAllViews();
-        for (DailyForecast forecast: weather.dailyforecast) {
-            View view = LayoutInflater.from(this).inflate(R.layout.forecast_item, forecastLayout, false);
-            TextView dateText = view.findViewById(R.id.date_text);
-            TextView infoText = view.findViewById(R.id.info_text);
-            TextView maxText = view.findViewById(R.id.max_text);
-            TextView minText = view.findViewById(R.id.min_text);
+            String cityName = weather.basic.cityName;
+            String updateTime = weather.basic.update.updateTime.split(" ")[1];
+            String degree = weather.now.tmp + "℃";
+            String weatherInfo = weather.now.cond.weatherInfo;
 
-            dateText.setText(forecast.date);
-            infoText.setText(forecast.cond.weatherForecast);
-            maxText.setText(forecast.tmp.maxTmp);
-            minText.setText(forecast.tmp.minTmp);
-            forecastLayout.addView(view);
+            titleCity.setText(cityName);
+            titleUpdateTime.setText("最近更新时间:"+updateTime);
+            degreeText.setText(degree);
+            weatherInfoText.setText(weatherInfo);
+            forecastLayout.removeAllViews();
+            for (DailyForecast forecast: weather.dailyforecast) {
+                View view = LayoutInflater.from(this).inflate(R.layout.forecast_item, forecastLayout, false);
+                TextView dateText = view.findViewById(R.id.date_text);
+                TextView infoText = view.findViewById(R.id.info_text);
+                TextView maxText = view.findViewById(R.id.max_text);
+                TextView minText = view.findViewById(R.id.min_text);
+
+                dateText.setText(forecast.date);
+                infoText.setText(forecast.cond.weatherForecast);
+                maxText.setText(forecast.tmp.maxTmp);
+                minText.setText(forecast.tmp.minTmp);
+                forecastLayout.addView(view);
+            }
+            if (weather.aqi != null) {
+                aqiTxt.setText(weather.aqi.city.aqi);
+                pm25Text.setText(weather.aqi.city.pm25);
+            }
+
+            String comf = "舒适度: " + weather.suggestion.comf.comfInfo;
+            String air = "空气质量: " + weather.suggestion.air.airTxt;
+            String uv = "紫外线指数: " + weather.suggestion.uv.uvTxt;
+
+            comfText.setText(comf);
+            airText.setText(air);
+            uvText.setText(uv);
+
+            weatherLayout.setVisibility(View.VISIBLE);
+
+            Intent intent = new Intent(this, AutoUpdateService.class);
+            startService(intent);
+        } else {
+            Toast.makeText(WeatherActivity.this,"获取天气信息失败!", Toast.LENGTH_SHORT).show();
         }
-        if (weather.aqi != null) {
-            aqiTxt.setText(weather.aqi.city.aqi);
-            pm25Text.setText(weather.aqi.city.pm25);
-        }
 
-        String comf = "舒适度: " + weather.suggestion.comf.comfInfo;
-        String air = "空气质量: " + weather.suggestion.air.airTxt;
-        String uv = "紫外线指数: " + weather.suggestion.uv.uvTxt;
 
-        comfText.setText(comf);
-        airText.setText(air);
-        uvText.setText(uv);
-
-        weatherLayout.setVisibility(View.VISIBLE);
     }
 
     /**
